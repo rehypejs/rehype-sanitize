@@ -1,13 +1,11 @@
 'use strict';
 
-/* Dependencies. */
 var test = require('tape');
 var rehype = require('rehype');
 var merge = require('deepmerge');
 var gh = require('hast-util-sanitize/lib/github');
 var sanitize = require('./');
 
-/* Tests. */
 test('sanitize', function (t) {
   t.plan(2);
 
