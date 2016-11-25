@@ -1,8 +1,7 @@
 language: node_js
 node_js:
 - '4.0'
-- '5.0'
-- '6.0'
+- '7.0'
 after_script: bash <(curl -s https://codecov.io/bash)
 deploy:
   - provider: npm
@@ -11,7 +10,7 @@ deploy:
       secure: qD4F4dLnsrgJHdPZ7HP6pwDr2FjwH5zvLbY9y/edPWhv7f6RNXLDjTwMkCnZ/mBQ01ffTnMbgv0P5p5i1QK2eKNS+crRkwtCXLY+mD0+OQRrvdYabUnBvfxcrihggbviiozwvXMtxQQRLIDQsyhxZ4EGtTBgDji96TvbvUnUlhvEtaDRcaSXcrjjjVruAnE5lfMM+Y6yeCI32wohShlF3hy9H/KbYrI+6Lc1yAfQg/LDjU3f9fEaksUHAgmDuodApyJi6W2v/IwaAMC5PB+8GnNzBi0v6jNXP2zMfirdBxhpufl/B29Mc7MMc+qnATFalUnkRY/Lqm3dZXiyc/s1ZbuyoFBpbu3MY7DYP9Vv/gCt6t1o7aK6lHjlOxqc6GdLVf5DZq2HFroWSztz68NpGwIl0MyTHtLhsYQ7Z98x4+BhAXUb6h1fuSP1coiayJMwO/Gm/DhS9qrbCZQut4PzciGYbcE9brdp1TAZxh1uPWB/4NAXkrepJyFcft0BF6+GZIdE5ge/77ONvnnrb/ROzB/eGxOiUjH0LGameTGppgy29XT7X6NlLhtRHBnkJ0kjwmp0gF/CWsbyni+jmXN6lq5S0SACsPIwQwtC/dsmUyi3m472aox03jWeQL9fBMzdfc1Sxw6Yy27b2pjOZuS62qww5WebDUNCavVfDCUvsus=
     on:
       tags: true
-      node: '5.0'
+      node: '4.0'
   - provider: releases
     api_key:
       secure: So/48YH6H9+WA4/ChUep57O9b5jh/aMMXEICKmjdIrAeNAxOv9WZLWmRZ4bH4joSEDgInk1BxL0sLa/lIZMSIqy+n+G23mTdrB0zpkatMmhBwH9rqjpeLzrPTJJ8kc1FFu53yAvhoIAAhXWDZexkbMc9PqOLUCvULOhGCIYqju/604FLl1Eer8SKKVDbM1FWH1WcAsQuHdIrPHsy1gSLg0Uh9Va9pKWOkx9KFePLsUzCEzdsunL9eq1ebH/bPLqNRYEKCYahMn38E16bZhaXVGzqDREmbZzaZwHAsFcPLPnn+3ZEtGlF0LG+ZH+xOe3xtF/3eCSag1fOtVi3dY+5O//OH6Fbv8iut0zWywplQP00B5I975ekMe6g+Rr8bVo3vUx+4mjgFZfB7n3iOFeiJrkEUB7qk2q1z0NyOHUVu3m+lM3qsAQIeYd81I9QaN6+HEl47JmhxWsehmX6JI9DT1GozPEtIOL1dFdzphjHrs7wH+ePNLPOLx0/WWDTvuNQvj/DmclCFDQeY4jE9eN+3ZFlVHgrHOUOvaWdH/UMTg9r6wK7mTx2Rr70rYL9M9ZnO4w+Ck8QGQeP6cMZ/kfiMtZ9zazAN2RndJocRZN7acE7G5w8RTbeLcIq00KZiyaMSh7zmtGlqHhJIvMHLggD4pLiKFilSOgUDBzQSceudtE=
@@ -20,4 +19,4 @@ deploy:
       - "rehype-sanitize.min.js"
     on:
       tags: true
-      node: '6.0'
+      node: '7.0'
