@@ -1,6 +1,6 @@
 {
   "name": "rehype-sanitize",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Sanitize HTML with rehype",
   "license": "MIT",
   "keywords": [
