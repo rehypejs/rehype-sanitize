@@ -42,8 +42,9 @@ var doc = vfile.readSync('index.html');
 var schema = merge(gh, {tagNames: ['math', 'mi']});
 
 rehype()
+  .data('settings', {fragment: true})
   .use(sanitize, schema)
-  .process(doc, {fragment: true}, function (err, file) {
+  .process(doc, function (err, file) {
     if (err) throw err;
     console.log(String(file));
   });

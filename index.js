@@ -4,9 +4,8 @@ var clean = require('hast-util-sanitize');
 
 module.exports = sanitize;
 
-function sanitize(processor, options) {
+function sanitize(options) {
   return transformer;
-
   function transformer(tree) {
     return clean(tree, options);
   }
