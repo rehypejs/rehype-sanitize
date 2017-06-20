@@ -72,6 +72,11 @@ Remove potentially dangerous things from HTML.
 The sanitation schema defines how and if nodes and properties should
 be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 
+## Related
+
+*   [`hast-util-sanitize`](https://github.com/wooorm/hast-util-sanitize)
+    — Core utility that does the sanitation
+
 ## License
 
 [MIT][license] © [Titus Wormer][author]
