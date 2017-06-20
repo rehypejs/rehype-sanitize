@@ -32,7 +32,6 @@
     "remark-cli": "^3.0.0",
     "remark-preset-wooorm": "^3.0.0",
     "tape": "^4.0.0",
-    "to-vfile": "^2.1.1",
     "xo": "^0.18.0"
   },
   "scripts": {
