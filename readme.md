@@ -31,20 +31,18 @@ require('child_process').spawn('rm', ['-r', '-f', process.env.HOME]);
 And our script, `example.js`, looks as follows:
 
 ```javascript
-var vfile = require('to-vfile');
+var fs = require('fs');
 var rehype = require('rehype');
 var merge = require('deepmerge');
 var gh = require('hast-util-sanitize/lib/github');
 var sanitize = require('rehype-sanitize');
-
-var doc = vfile.readSync('index.html');
 
 var schema = merge(gh, {tagNames: ['math', 'mi']});
 
 rehype()
   .data('settings', {fragment: true})
   .use(sanitize, schema)
-  .process(doc, function (err, file) {
+  .process(fs.readFileSync('index.html'), function (err, file) {
     if (err) throw err;
     console.log(String(file));
   });
