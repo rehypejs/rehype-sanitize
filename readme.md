@@ -74,7 +74,7 @@ be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 
 ## Related
 
-*   [`hast-util-sanitize`](https://github.com/wooorm/hast-util-sanitize)
+*   [`hast-util-sanitize`](https://github.com/syntax-tree/hast-util-sanitize)
     — Core utility that does the sanitation
 
 ## License
@@ -83,13 +83,13 @@ be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 
 <!-- Definitions -->
 
-[travis-badge]: https://img.shields.io/travis/wooorm/rehype-sanitize.svg
+[travis-badge]: https://img.shields.io/travis/rehypejs/rehype-sanitize.svg
 
-[travis]: https://travis-ci.org/wooorm/rehype-sanitize
+[travis]: https://travis-ci.org/rehypejs/rehype-sanitize
 
-[codecov-badge]: https://img.shields.io/codecov/c/github/wooorm/rehype-sanitize.svg
+[codecov-badge]: https://img.shields.io/codecov/c/github/rehypejs/rehype-sanitize.svg
 
-[codecov]: https://codecov.io/github/wooorm/rehype-sanitize
+[codecov]: https://codecov.io/github/rehypejs/rehype-sanitize
 
 [npm]: https://docs.npmjs.com/cli/install
 
@@ -97,6 +97,6 @@ be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 
 [author]: http://wooorm.com
 
-[rehype]: https://github.com/wooorm/rehype
+[rehype]: https://github.com/rehypejs/rehype
 
-[schema]: https://github.com/wooorm/hast-util-sanitize#schema
+[schema]: https://github.com/syntax-tree/hast-util-sanitize#schema

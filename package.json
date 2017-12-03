@@ -10,8 +10,8 @@
     "clean",
     "html"
   ],
-  "repository": "https://github.com/wooorm/rehype-sanitize",
-  "bugs": "https://github.com/wooorm/rehype-sanitize/issues",
+  "repository": "rehypejs/rehype-sanitize",
+  "bugs": "https://github.com/rehypejs/rehype-sanitize/issues",
   "author": "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)",
   "contributors": [
     "Titus Wormer <tituswormer@gmail.com> (http://wooorm.com)"
@@ -58,6 +58,8 @@
     ]
   },
   "remarkConfig": {
-    "plugins": ["preset-wooorm"]
+    "plugins": [
+      "preset-wooorm"
+    ]
   }
 }
