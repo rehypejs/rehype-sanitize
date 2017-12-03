@@ -77,6 +77,13 @@ be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 *   [`hast-util-sanitize`](https://github.com/syntax-tree/hast-util-sanitize)
     — Core utility that does the sanitation
 
+## Contribute
+
+See [`contribute.md` in `rehypejs/rehype`][contribute] for ways to get started.
+
+This organisation has a [Code of Conduct][coc].  By interacting with this
+repository, organisation, or community you agree to abide by its terms.
+
 ## License
 
 [MIT][license] © [Titus Wormer][author]
@@ -100,3 +107,7 @@ be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 [rehype]: https://github.com/rehypejs/rehype
 
 [schema]: https://github.com/syntax-tree/hast-util-sanitize#schema
+
+[contribute]: https://github.com/rehypejs/rehype/blob/master/contributing.md
+
+[coc]: https://github.com/rehypejs/rehype/blob/master/code-of-conduct.md
