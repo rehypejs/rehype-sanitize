@@ -1,12 +1,12 @@
-'use strict';
+'use strict'
 
-var clean = require('hast-util-sanitize');
+var clean = require('hast-util-sanitize')
 
-module.exports = sanitize;
+module.exports = sanitize
 
 function sanitize(options) {
-  return transformer;
+  return transformer
   function transformer(tree) {
-    return clean(tree, options);
+    return clean(tree, options)
   }
 }
