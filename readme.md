@@ -3,19 +3,22 @@
 [![Build][build-badge]][build]
 [![Coverage][coverage-badge]][coverage]
 [![Downloads][downloads-badge]][downloads]
+[![Size][size-badge]][size]
+[![Sponsors][sponsors-badge]][collective]
+[![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-Sanitise HTML with [**rehype**][rehype].
+[**rehype**][rehype] plugin to sanitise HTML.
 
-## Installation
+## Install
 
 [npm][]:
 
-```bash
+```sh
 npm install rehype-sanitize
 ```
 
-## Usage
+## Use
 
 Say we have the following file, `index.html`:
 
@@ -35,7 +38,7 @@ require('child_process').spawn('rm', ['-r', '-f', process.env.HOME]);
 
 And our script, `example.js`, looks as follows:
 
-```javascript
+```js
 var fs = require('fs')
 var rehype = require('rehype')
 var merge = require('deepmerge')
@@ -70,12 +73,13 @@ Now, running `node example` yields:
 
 ### `rehype().use(sanitize[, schema])`
 
-Remove potentially dangerous things from HTML.
+Remove potentially dangerous things from HTML, or more correct: keep only safe
+the things in a document.
 
 ###### `schema`
 
-The sanitation schema defines how and if nodes and properties should
-be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
+The sanitation schema defines how and if nodes and properties should be cleaned.
+The schema is documented in [`hast-util-sanitize`][schema].
 
 ## Related
 
@@ -84,11 +88,13 @@ be cleaned.  The schema is documented in [`hast-util-sanitize`][schema].
 
 ## Contribute
 
-See [`contributing.md` in `rehypejs/rehype`][contribute] for ways to get
-started.
+See [`contributing.md`][contributing] in [`rehypejs/.github`][health] for ways
+to get started.
+See [`support.md`][support] for ways to get help.
 
-This organisation has a [Code of Conduct][coc].  By interacting with this
-repository, organisation, or community you agree to abide by its terms.
+This project has a [Code of Conduct][coc].
+By interacting with this repository, organisation, or community you agree to
+abide by its terms.
 
 ## License
 
@@ -108,11 +114,29 @@ repository, organisation, or community you agree to abide by its terms.
 
 [downloads]: https://www.npmjs.com/package/rehype-sanitize
 
+[size-badge]: https://img.shields.io/bundlephobia/minzip/rehype-sanitize.svg
+
+[size]: https://bundlephobia.com/result?p=rehype-sanitize
+
+[sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
+
+[backers-badge]: https://opencollective.com/unified/backers/badge.svg
+
+[collective]: https://opencollective.com/unified
+
 [chat-badge]: https://img.shields.io/badge/join%20the%20community-on%20spectrum-7b16ff.svg
 
 [chat]: https://spectrum.chat/unified/rehype
 
 [npm]: https://docs.npmjs.com/cli/install
+
+[health]: https://github.com/rehypejs/.github
+
+[contributing]: https://github.com/rehypejs/.github/blob/master/contributing.md
+
+[support]: https://github.com/rehypejs/.github/blob/master/support.md
+
+[coc]: https://github.com/rehypejs/.github/blob/master/code-of-conduct.md
 
 [license]: license
 
@@ -121,7 +145,3 @@ repository, organisation, or community you agree to abide by its terms.
 [rehype]: https://github.com/rehypejs/rehype
 
 [schema]: https://github.com/syntax-tree/hast-util-sanitize#schema
-
-[contribute]: https://github.com/rehypejs/rehype/blob/master/contributing.md
-
-[coc]: https://github.com/rehypejs/rehype/blob/master/code-of-conduct.md
