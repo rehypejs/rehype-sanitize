@@ -1,9 +1,10 @@
 {
   "name": "rehype-sanitize",
   "version": "2.0.2",
-  "description": "Sanitize HTML with rehype",
+  "description": "rehype plugin to sanitize HTML",
   "license": "MIT",
   "keywords": [
+    "unified",
     "rehype",
     "plugin",
     "sanitize",
