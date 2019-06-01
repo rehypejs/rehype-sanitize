@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-- lts/boron
-- node
+  - lts/dubnium
+  - node
 after_script: bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: releases
@@ -9,7 +9,7 @@ deploy:
   api_key:
     secure: XQLbDs40uuK0yBeI84dQntR9qzzrQQcDJjzwATUnidLdRirRXePBKkhJCGW+N2YIT2K9g4ghlpbFEZaPfUlraEcIhjBpCQRz4MjUrUMQ2+Rk9FK2J9xdgGakGUPeYXl7Lkw71pchgWYzKZVQpqfv48datAUYfdSmHUkJXR6fI5y8OxOQtTFspbiGJ71SgPFBYjvsDcEmiHp0ng2Qkb7cgvYPH8aRy5eIXRXrrv/Bsjlm+e/6wHB44a1scIFSLE1bNVzkwDSmv0e/ytjpliOxIALlQV08aO/p4ufR+XIP1HDRkXENJlDn8gmyA2ov7tcv0oJgEU6DuRXgjBGYmMuF5peNjqrzFNO21wtkisx5rBz9qON9WtiBseBU5dBuIZz2QsqDNv9Z7GRIrLnG0EjfTuCGMOMO3t7Lpx5Ba3cY7HKzMUVv46qgxxX3VeEur0FI5kfaOLGKuqxPh0loBZXbVV/WjWUuTv2v25GOrBmnFuZ/xrM83805sYd0HO+b+56nieYONYVPPGkf5ZIQXUcnpaHLNks32rDPpHARmqLltyIrE75zqfOMyCyrQWVIUQEEiUi95QyDZIzd9uR5NGLqSTMBZfEWUq6JD8QEgLEl13DPnasSzB/gqNllDEL0iLzPYX3Z89t9L9wVxxo0NxK8jpOOVuzNjuvCzPVy2d45rg4=
   file:
-    - "rehype-sanitize.js"
-    - "rehype-sanitize.min.js"
+    - 'rehype-sanitize.js'
+    - 'rehype-sanitize.min.js'
   on:
     tags: true
