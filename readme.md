@@ -81,6 +81,15 @@ the things in a document.
 The sanitation schema defines how and if nodes and properties should be cleaned.
 The schema is documented in [`hast-util-sanitize`][schema].
 
+## Security
+
+Improper use of `rehype-sanitize` can open you up to a
+[cross-site scripting (XSS)][xss] attack.
+The defaults *are* safe, but deviating from them is likely *unsafe*.
+
+Use `rehype-sanitize` *after* all other plugins, as other plugins are likely
+also unsafe.
+
 ## Related
 
 *   [`hast-util-sanitize`](https://github.com/syntax-tree/hast-util-sanitize)
@@ -143,5 +152,7 @@ abide by its terms.
 [author]: https://wooorm.com
 
 [rehype]: https://github.com/rehypejs/rehype
+
+[xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
 [schema]: https://github.com/syntax-tree/hast-util-sanitize#schema
