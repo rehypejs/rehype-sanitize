@@ -1,6 +1,6 @@
 {
   "name": "rehype-sanitize",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "rehype plugin to sanitize HTML",
   "license": "MIT",
   "keywords": [
