@@ -73,8 +73,8 @@ Now, running `node example` yields:
 
 ### `rehype().use(sanitize[, schema])`
 
-Remove potentially dangerous things from HTML, or more correct: keep only the safe 
-things in a document.
+Remove potentially dangerous things from HTML, or more correct: keep only the
+safe things in a document.
 
 ###### `schema`
 
