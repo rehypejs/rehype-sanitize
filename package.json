@@ -29,8 +29,7 @@
     "index.js"
   ],
   "dependencies": {
-    "hast-util-sanitize": "^3.0.0",
-    "unified": "^9.0.0"
+    "hast-util-sanitize": "^3.0.0"
   },
   "devDependencies": {
     "browserify": "^16.0.0",
@@ -73,7 +72,8 @@
     "prettier": true,
     "esnext": false,
     "rules": {
-      "unicorn/string-content": "off"
+      "unicorn/string-content": "off",
+      "import/no-extraneous-dependencies": "off"
     },
     "ignores": [
       "rehype-sanitize.js"
