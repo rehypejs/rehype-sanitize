@@ -111,9 +111,9 @@ abide by its terms.
 
 <!-- Definitions -->
 
-[build-badge]: https://img.shields.io/travis/rehypejs/rehype-sanitize.svg
+[build-badge]: https://github.com/rehypejs/rehype-sanitize/workflows/main/badge.svg
 
-[build]: https://travis-ci.org/rehypejs/rehype-sanitize
+[build]: https://github.com/rehypejs/rehype-sanitize/actions
 
 [coverage-badge]: https://img.shields.io/codecov/c/github/rehypejs/rehype-sanitize.svg
 
