@@ -14,7 +14,5 @@ export {defaultSchema}
  */
 export default function rehypeSanitize(options = defaultSchema) {
   // @ts-expect-error: assume input `root` matches output root.
-  return (tree) => {
-    return hastUtilSanitize(tree, options)
-  }
+  return (tree) => hastUtilSanitize(tree, options)
 }
