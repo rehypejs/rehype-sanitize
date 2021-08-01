@@ -12,6 +12,9 @@
 
 ## Install
 
+This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
+Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
+
 [npm][]:
 
 ```sh
@@ -36,22 +39,22 @@ require('child_process').spawn('rm', ['-r', '-f', process.env.HOME]);
 </script>
 ```
 
-And our script, `example.js`, looks as follows:
+And our module, `example.js`, looks as follows:
 
 ```js
-var fs = require('fs')
-var rehype = require('rehype')
-var merge = require('deepmerge')
-var gh = require('hast-util-sanitize/lib/github')
-var sanitize = require('rehype-sanitize')
+import fs from 'node:fs'
+import {rehype} from 'rehype'
+import deepmerge from 'deepmerge'
+import rehypeSanitize, {defaultSchema} from 'rehype-sanitize'
 
-var schema = merge(gh, {tagNames: ['math', 'mi']})
+const schema = deepmerge(defaultSchema, {tagNames: ['math', 'mi']})
+const buf = fs.readFileSync('index.html')
 
 rehype()
   .data('settings', {fragment: true})
-  .use(sanitize, schema)
-  .process(fs.readFileSync('index.html'), function(err, file) {
-    if (err) throw err
+  .use(rehypeSanitize, schema)
+  .process(buf)
+  .then((file) => {
     console.log(String(file))
   })
 ```
@@ -71,7 +74,10 @@ Now, running `node example` yields:
 
 ## API
 
-### `rehype().use(sanitize[, schema])`
+This package exports the following identifiers: `defaultSchema`.
+The default export is `rehypeSanitize`.
+
+### `unified().use(rehypeSanitize[, schema])`
 
 Remove potentially dangerous things from HTML, or more correct: keep only the
 safe things in a document.
@@ -80,6 +86,7 @@ safe things in a document.
 
 The sanitation schema defines how and if nodes and properties should be cleaned.
 The schema is documented in [`hast-util-sanitize`][schema].
+The default schema is exported as `defaultSchema`.
 
 ## Security
 
