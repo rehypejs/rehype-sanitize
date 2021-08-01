@@ -1,10 +1,20 @@
+/**
+ * @typedef {import('hast').Root} Root
+ * @typedef {import('hast-util-sanitize').Schema} Options
+ */
+
 import {sanitize as hastUtilSanitize, defaultSchema} from 'hast-util-sanitize'
 
 export {defaultSchema}
 
-export default function rehypeSanitize(options) {
-  return transformer
-  function transformer(tree) {
+/**
+ * Plugin to sanitize HTML.
+ *
+ * @type {import('unified').Plugin<[Options?] | void[], Root, Root>}
+ */
+export default function rehypeSanitize(options = defaultSchema) {
+  // @ts-expect-error: assume input `root` matches output root.
+  return (tree) => {
     return hastUtilSanitize(tree, options)
   }
 }

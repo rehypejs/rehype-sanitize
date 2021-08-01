@@ -16,7 +16,7 @@ test('rehypeSanitize', (t) => {
       .use(rehypeSanitize)
       .process(input, (error, file) => {
         st.ifErr(error, 'shouldn’t fail')
-        st.equal(file.messages.length, 0, 'shouldn’t warn')
+        st.equal((file || {messages: []}).messages.length, 0, 'shouldn’t warn')
         st.equal(String(file), String(output), 'should match')
       })
   })
@@ -32,7 +32,7 @@ test('rehypeSanitize', (t) => {
       .use(rehypeSanitize, merge(defaultSchema, {tagNames: ['math', 'mi']}))
       .process(input, (error, file) => {
         st.ifErr(error, 'shouldn’t fail')
-        st.equal(file.messages.length, 0, 'shouldn’t warn')
+        st.equal((file || {messages: []}).messages.length, 0, 'shouldn’t warn')
         st.equal(String(file), String(output), 'should match')
       })
   })
