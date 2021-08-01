@@ -1,5 +1,2 @@
 coverage/
-rehype-sanitize.js
-rehype-sanitize.min.js
-*.json
 *.md

@@ -46,13 +46,10 @@
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
-    "build-bundle": "browserify index.js -s rehypeSanitize -o rehype-sanitize.js",
-    "build-mangle": "browserify index.js -s rehypeSanitize -o rehype-sanitize.min.js -p tinyify",
-    "build": "npm run build-bundle && npm run build-mangle",
     "test-api": "node --conditions development test.js",
     "test-coverage": "c8 --check-coverage --branches 100 --functions 100 --lines 100 --statements 100 --reporter lcov node --conditions development test.js",
     "test-types": "dtslint types",
-    "test": "npm run format && npm run build && npm run test-coverage && npm run test-types"
+    "test": "npm run format && npm run test-coverage && npm run test-types"
   },
   "prettier": {
     "tabWidth": 2,
