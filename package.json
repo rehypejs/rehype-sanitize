@@ -42,7 +42,7 @@
     "remark-preset-wooorm": "^8.0.0",
     "tape": "^5.0.0",
     "tinyify": "^3.0.0",
-    "xo": "^0.38.0"
+    "xo": "^0.39.0"
   },
   "scripts": {
     "format": "remark . -qfo && prettier . -w --loglevel warn && xo --fix",
@@ -60,13 +60,8 @@
   },
   "xo": {
     "prettier": true,
-    "esnext": false,
-    "rules": {
-      "unicorn/string-content": "off",
-      "import/no-extraneous-dependencies": "off"
-    },
     "ignores": [
-      "rehype-sanitize.js"
+      "types/"
     ]
   },
   "remarkConfig": {
