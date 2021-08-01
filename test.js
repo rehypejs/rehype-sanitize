@@ -1,12 +1,9 @@
-'use strict'
+import test from 'tape'
+import rehype from 'rehype'
+import merge from 'deepmerge'
+import rehypeSanitize, {defaultSchema} from './index.js'
 
-var test = require('tape')
-var rehype = require('rehype')
-var merge = require('deepmerge')
-var gh = require('hast-util-sanitize/lib/github')
-var sanitize = require('.')
-
-test('sanitize', function (t) {
+test('rehypeSanitize', function (t) {
   t.plan(2)
 
   t.test('should work', function (st) {
@@ -16,9 +13,9 @@ test('sanitize', function (t) {
     st.plan(3)
 
     rehype()
-      .use(sanitize)
-      .process(input, function (err, file) {
-        st.ifErr(err, 'shouldn’t fail')
+      .use(rehypeSanitize)
+      .process(input, function (error, file) {
+        st.ifErr(error, 'shouldn’t fail')
         st.equal(file.messages.length, 0, 'shouldn’t warn')
         st.equal(String(file), String(output), 'should match')
       })
@@ -32,9 +29,9 @@ test('sanitize', function (t) {
     st.plan(3)
 
     rehype()
-      .use(sanitize, merge(gh, {tagNames: ['math', 'mi']}))
-      .process(input, function (err, file) {
-        st.ifErr(err, 'shouldn’t fail')
+      .use(rehypeSanitize, merge(defaultSchema, {tagNames: ['math', 'mi']}))
+      .process(input, function (error, file) {
+        st.ifErr(error, 'shouldn’t fail')
         st.equal(file.messages.length, 0, 'shouldn’t warn')
         st.equal(String(file), String(output), 'should match')
       })

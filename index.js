@@ -1,12 +1,10 @@
-'use strict'
+import {sanitize as hastUtilSanitize, defaultSchema} from 'hast-util-sanitize'
 
-var clean = require('hast-util-sanitize')
+export {defaultSchema}
 
-module.exports = sanitize
-
-function sanitize(options) {
+export default function rehypeSanitize(options) {
   return transformer
   function transformer(tree) {
-    return clean(tree, options)
+    return hastUtilSanitize(tree, options)
   }
 }
