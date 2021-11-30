@@ -8,7 +8,7 @@ import {sanitize as hastUtilSanitize, defaultSchema} from 'hast-util-sanitize'
 /**
  * Plugin to sanitize HTML.
  *
- * @type {import('unified').Plugin<[Options?] | void[], Root, Root>}
+ * @type {import('unified').Plugin<[Options?] | Array<void>, Root, Root>}
  */
 export default function rehypeSanitize(options = defaultSchema) {
   // @ts-expect-error: assume input `root` matches output root.
