@@ -5,8 +5,6 @@
 
 import {sanitize as hastUtilSanitize, defaultSchema} from 'hast-util-sanitize'
 
-export {defaultSchema}
-
 /**
  * Plugin to sanitize HTML.
  *
@@ -16,3 +14,5 @@ export default function rehypeSanitize(options = defaultSchema) {
   // @ts-expect-error: assume input `root` matches output root.
   return (tree) => hastUtilSanitize(tree, options)
 }
+
+export {defaultSchema} from 'hast-util-sanitize'
