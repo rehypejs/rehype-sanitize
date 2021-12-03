@@ -333,7 +333,7 @@ It is possible to pass a schema which allows MathML and inline styles, but it
 would be complex, and allows *all* inline styles, which is unsafe.
 Alternatively, and arguably better, would be to *first* sanitize the HTML,
 allowing only the specific classes that `rehype-katex` and `rehype-mathjax` use,
-and *then* using them:
+and *then* using those plugins:
 
 ```diff
 @@ -1,7 +1,7 @@
