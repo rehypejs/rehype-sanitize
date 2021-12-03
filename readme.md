@@ -8,22 +8,75 @@
 [![Backers][backers-badge]][collective]
 [![Chat][chat-badge]][chat]
 
-[**rehype**][rehype] plugin to sanitize HTML.
+**[rehype][]** plugin to sanitize HTML.
+
+## Contents
+
+*   [What is this?](#what-is-this)
+*   [When should I use this?](#when-should-i-use-this)
+*   [Install](#install)
+*   [Use](#use)
+*   [API](#api)
+    *   [`unified().use(rehypeSanitize[, schema])`](#unifieduserehypesanitize-schema)
+*   [Example](#example)
+    *   [Example: headings (DOM clobbering)](#example-headings-dom-clobbering)
+    *   [Example: math](#example-math)
+    *   [Example: syntax highlighting](#example-syntax-highlighting)
+*   [Types](#types)
+*   [Compatibility](#compatibility)
+*   [Security](#security)
+*   [Related](#related)
+*   [Contribute](#contribute)
+*   [License](#license)
+
+## What is this?
+
+This package is a [unified][] ([rehype][]) plugin to make sure HTML is safe.
+It drops anything that isn’t explicitly allowed by a schema (defaulting to how
+`github.com` works).
+
+**unified** is a project that transforms content with abstract syntax trees
+(ASTs).
+**rehype** adds support for HTML to unified.
+**hast** is the HTML AST that rehype uses.
+This is a rehype plugin that transforms hast.
+
+## When should I use this?
+
+It’s recommended to sanitize your HTML any time you do not completely trust
+authors or the plugins being used.
+
+This plugin is built on [`hast-util-sanitize`][hast-util-sanitize], which cleans
+[hast][] syntax trees.
+rehype focusses on making it easier to transform content by abstracting such
+internals away.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):
-Node 12+ is needed to use it and it must be `import`ed instead of `require`d.
-
-[npm][]:
+This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
+In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
 
 ```sh
 npm install rehype-sanitize
 ```
 
+In Deno with [Skypack][]:
+
+```js
+import rehypeSanitize from 'https://cdn.skypack.dev/rehype-sanitize@5?dts'
+```
+
+In browsers with [Skypack][]:
+
+```html
+<script type="module">
+  import rehypeSanitize from 'https://cdn.skypack.dev/rehype-sanitize@5?min'
+</script>
+```
+
 ## Use
 
-Say we have the following file, `index.html`:
+Say we have the following file `index.html`:
 
 ```html
 <div onmouseover="alert('alpha')">
@@ -35,40 +88,42 @@ Say we have the following file, `index.html`:
   </math>
 </div>
 <script>
-require('child_process').spawn('rm', ['-r', '-f', process.env.HOME]);
+require('child_process').spawn('echo', ['hack!']);
 </script>
 ```
 
-And our module, `example.js`, looks as follows:
+And our module `example.js` looks as follows:
 
 ```js
-import fs from 'node:fs'
-import {rehype} from 'rehype'
-import deepmerge from 'deepmerge'
-import rehypeSanitize, {defaultSchema} from 'rehype-sanitize'
+import {read} from 'to-vfile'
+import {unified} from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeSanitize from 'rehype-sanitize'
+import rehypeStringify from 'rehype-stringify'
 
-const schema = deepmerge(defaultSchema, {tagNames: ['math', 'mi']})
-const buf = fs.readFileSync('index.html')
+main()
 
-rehype()
-  .data('settings', {fragment: true})
-  .use(rehypeSanitize, schema)
-  .process(buf)
-  .then((file) => {
-    console.log(String(file))
-  })
+async function main() {
+  const file = await unified()
+    .use(rehypeParse, {fragment: true})
+    .use(rehypeSanitize)
+    .use(rehypeStringify)
+    .process(await read('index.html'))
+
+  console.log(String(file))
+}
 ```
 
-Now, running `node example` yields:
+Now running `node example.js` yields:
 
 ```html
 <div>
   <a>delta</a>
   <img src="x">
 
-  <math>
-    <mi></mi>
-  </math>
+
+
+
 </div>
 ```
 
@@ -79,28 +134,339 @@ The default export is `rehypeSanitize`.
 
 ### `unified().use(rehypeSanitize[, schema])`
 
-Remove potentially dangerous things from HTML, or more correct: keep only the
-safe things in a document.
+Sanitize HTML.
 
 ###### `schema`
 
-The sanitation schema defines how and if nodes and properties should be cleaned.
-The schema is documented in [`hast-util-sanitize`][schema].
+Sanitation schema that defines if and how nodes and properties should be
+cleaned.
 The default schema is exported as `defaultSchema`.
+
+This option is a bit advanced as it requires knowledge of ASTs, so we defer
+to the documentation available for [`Schema` in `hast-util-sanitize`][schema].
+
+## Example
+
+### Example: headings (DOM clobbering)
+
+DOM clobbering is an attack in which malicious HTML confuses an application by
+naming elements, through `id` or `name` attributes, such that they overshadow
+presumed properties in `window` (the global scope in browsers).
+DOM clobbering often occurs when user content is used to generate heading IDs.
+To illustrate, say we have this `browser.js` file:
+
+```js
+console.log(current)
+```
+
+And our module `example.js` contains:
+
+```js
+import {promises as fs} from 'node:fs'
+import {unified} from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeStringify from 'rehype-stringify'
+
+main()
+
+async function main() {
+  const browser = String(await fs.readFile('browser.js'))
+  const document = `<a name="old"></a>
+<h1 id="current">Current</h1>
+${`<p>${'Lorem ipsum dolor sit amet. '.repeat(20)}</p>\n`.repeat(20)}
+<p>Link to <a href="#current">current</a>, link to <a href="#old">old</a>.`
+
+  const file = await unified()
+    .use(rehypeParse, {fragment: true})
+    .use(() => (tree) => {
+      tree.children.push({
+        type: 'element',
+        tagName: 'script',
+        properties: {type: 'module'},
+        children: [{type: 'text', value: browser}]
+      })
+    })
+    .use(rehypeStringify)
+    .process(document)
+
+  await fs.writeFile('output.html', file.value)
+}
+```
+
+This code processes HTML, inlines our browser script into it, and writes it out.
+The input HTML models how markdown often looks on platforms like GitHub, which
+allow heading IDs to be generated from their text and embedded HTML (including
+`<a name="old"></a>`, which can be used to create anchors for renamed headings
+to prevent links from breaking).
+The generated HTML looks like:
+
+```html
+<a name="old"></a>
+<h1 id="current">Current</h1>
+<p>Lorem ipsum dolor sit amet.<!--…--></p>
+<p>Link to <a href="#current">current</a>, link to <a href="#old">old</a>.</p>
+<script type="module">console.log(current)</script>
+```
+
+When you run this code locally, open the generated `output.html`, you can
+observe that the links at the bottom work, but also that the `<h1>` element
+is printed to the console (the clobbering).
+`rehype-sanitize` solved the clobbering by prefixing every `id` and `name`
+attribute with `'user-content-'`.
+Changing `example.js`:
+
+```diff
+@@ -15,6 +15,7 @@ ${`<p>${'Lorem ipsum dolor sit amet. '.repeat(20)}</p>\n`.repeat(20)}
+
+   const file = await unified()
+     .use(rehypeParse, {fragment: true})
++    .use(rehypeSanitize)
+     .use(() => (tree) => {
+       tree.children.push({
+         type: 'element',
+```
+
+Now yields:
+
+```diff
+-<a name="old"></a>
+-<h1 id="current">Current</h1>
++<a name="user-content-old"></a>
++<h1 id="user-content-current">Current</h1>
+```
+
+But this introduces another problem as the links are now broken.
+It could perhaps be solved by changing all links, but that would make the links
+rather ugly, and we’d need to track what IDs we have outside of the user content
+on our pages too.
+Alternatively, and what arguably looks better, we could rewrite pretty links to
+their safe but ugly prefixed elements.
+This is what GitHub does.
+Replace `browser.js` with the following:
+
+```js
+// Page load (you could wrap this in a DOM ready if the script is loaded early).
+hashchange()
+
+// When URL changes.
+window.addEventListener('hashchange', hashchange)
+
+// When on the URL already, perhaps after scrolling, and clicking again, which
+// doesn’t emit `hashchange`.
+document.addEventListener(
+  'click',
+  (event) => {
+    if (
+      event.target &&
+      event.target instanceof HTMLAnchorElement &&
+      event.target.href === location.href &&
+      location.hash.length > 1
+    ) {
+      setTimeout(() => {
+        if (!event.defaultPrevented) {
+          hashchange()
+        }
+      })
+    }
+  },
+  false
+)
+
+function hashchange() {
+  /** @type {string|undefined} */
+  let hash
+
+  try {
+    hash = decodeURIComponent(location.hash.slice(1)).toLowerCase()
+  } catch {
+    return
+  }
+
+  const name = 'user-content-' + hash
+  const target =
+    document.getElementById(name) || document.getElementsByName(name)[0]
+
+  if (target) {
+    setTimeout(() => {
+      target.scrollIntoView()
+    }, 0)
+  }
+}
+```
+
+### Example: math
+
+Math can be enabled in rehype by using the plugins
+[`rehype-katex`][rehype-katex] or [`rehype-mathjax`][rehype-mathjax].
+The operate on `span`s and `div`s with certain classes and inject complex markup
+and of inline styles, most of which this plugin will remove.
+Say our module `example.js` contains:
+
+```js
+import {unified} from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeKatex from 'rehype-katex'
+import rehypeSanitize from 'rehype-sanitize'
+import rehypeStringify from 'rehype-stringify'
+
+main()
+
+async function main() {
+  const file = await unified()
+    .use(rehypeParse, {fragment: true})
+    .use(rehypeKatex)
+    .use(rehypeSanitize)
+    .use(rehypeStringify)
+    .process('<span class="math math-inline">L</span>')
+
+  console.log(String(file))
+}
+```
+
+Running that yields:
+
+```html
+<span><span><span>LL</span><span aria-hidden="true"><span><span></span><span>L</span></span></span></span></span>
+```
+
+It is possible to pass a schema which allows MathML and inline styles, but it
+would be complex, and allows *all* inline styles, which is unsafe.
+Alternatively, and arguably better, would be to *first* sanitize the HTML,
+allowing only the specific classes that `rehype-katex` and `rehype-mathjax` use,
+and *then* using them:
+
+```diff
+@@ -1,7 +1,7 @@
+ import {unified} from 'unified'
+ import rehypeParse from 'rehype-parse'
+ import rehypeKatex from 'rehype-katex'
+-import rehypeSanitize from 'rehype-sanitize'
++import rehypeSanitize, {defaultSchema} from 'rehype-sanitize'
+ import rehypeStringify from 'rehype-stringify'
+
+ main()
+@@ -9,8 +9,21 @@ main()
+ async function main() {
+   const file = await unified()
+     .use(rehypeParse, {fragment: true})
++    .use(rehypeSanitize, {
++      ...defaultSchema,
++      attributes: {
++        ...defaultSchema.attributes,
++        div: [
++          ...(defaultSchema.attributes.div || []),
++          ['className', 'math', 'math-display']
++        ],
++        span: [
++          ...(defaultSchema.attributes.span || []),
++          ['className', 'math', 'math-inline']
++        ]
++      }
++    })
+     .use(rehypeKatex)
+-    .use(rehypeSanitize)
+     .use(rehypeStringify)
+     .process('<span class="math math-inline">L</span>')
+```
+
+### Example: syntax highlighting
+
+Highlighting, for example with [`rehype-highlight`][rehype-highlight], can be
+solved similar to how math is solved (see previous example):
+
+```js
+import {unified} from 'unified'
+import rehypeParse from 'rehype-parse'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeSanitize, {defaultSchema} from './index.js'
+import rehypeStringify from 'rehype-stringify'
+
+main()
+
+async function main() {
+  const file = await unified()
+    .use(rehypeParse, {fragment: true})
+    .use(rehypeSanitize, {
+      ...defaultSchema,
+      attributes: {
+        ...defaultSchema.attributes,
+        code: [
+          ...(defaultSchema.attributes.code || []),
+          // List of all allowed languages:
+          ['className', 'language-js', 'language-css', 'language-md']
+        ]
+      }
+    })
+    .use(rehypeHighlight, {subset: false})
+    .use(rehypeStringify)
+    .process('<pre><code className="language-js">console.log(1)</code></pre>')
+
+  console.log(String(file))
+}
+```
+
+Alternatively, it’s possible to make highlighting safe by allowing all the
+classes used on tokens.
+Modifying the above code like so:
+
+```diff
+ async function main() {
+   const file = await unified()
+     .use(rehypeParse, {fragment: true})
++    .use(rehypeHighlight, {subset: false})
+     .use(rehypeSanitize, {
+       ...defaultSchema,
+       attributes: {
+         ...defaultSchema.attributes,
+-        code: [
+-          ...(defaultSchema.attributes.code || []),
+-          // List of all allowed languages:
+-          ['className', 'hljs', 'language-js', 'language-css', 'language-md']
++        span: [
++          ...(defaultSchema.attributes.span || []),
++          // List of all allowed tokens:
++          ['className', 'hljs-addition', 'hljs-attr', 'hljs-attribute', 'hljs-built_in', 'hljs-bullet', 'hljs-char', 'hljs-code', 'hljs-comment', 'hljs-deletion', 'hljs-doctag', 'hljs-emphasis', 'hljs-formula', 'hljs-keyword', 'hljs-link', 'hljs-literal', 'hljs-meta', 'hljs-name', 'hljs-number', 'hljs-operator', 'hljs-params', 'hljs-property', 'hljs-punctuation', 'hljs-quote', 'hljs-regexp', 'hljs-section', 'hljs-selector-attr', 'hljs-selector-class', 'hljs-selector-id', 'hljs-selector-pseudo', 'hljs-selector-tag', 'hljs-string', 'hljs-strong', 'hljs-subst', 'hljs-symbol', 'hljs-tag', 'hljs-template-tag', 'hljs-template-variable', 'hljs-title', 'hljs-type', 'hljs-variable'
++          ]
+         ]
+       }
+     })
+-    .use(rehypeHighlight, {subset: false})
+     .use(rehypeStringify)
+     .process('<pre><code className="language-js">console.log(1)</code></pre>')
+```
+
+## Types
+
+This package is fully typed with [TypeScript][].
+It exports an `Options` type, which specifies the interface of the accepted
+options.
+
+## Compatibility
+
+Projects maintained by the unified collective are compatible with all maintained
+versions of Node.js.
+As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
+Our projects sometimes work with older versions, but this is not guaranteed.
+
+This plugin works with `rehype-parse` version 3+, `rehype-stringify` version 3+,
+`rehype` version 5+, and `unified` version 6+.
 
 ## Security
 
-Improper use of `rehype-sanitize` can open you up to a
+The defaults are safe but improper use of `rehype-sanitize` can open you up to a
 [cross-site scripting (XSS)][xss] attack.
-The defaults *are* safe, but deviating from them is likely *unsafe*.
 
-Use `rehype-sanitize` *after* all other plugins, as other plugins are likely
-also unsafe.
+Use `rehype-sanitize` after the last unsafe thing: everything after
+`rehype-sanitize` could be unsafe (but is fine if you do trust it).
 
 ## Related
 
 *   [`hast-util-sanitize`](https://github.com/syntax-tree/hast-util-sanitize)
-    — Core utility that does the sanitation
+    — utility to sanitize [hast][]
+*   [`rehype-format`](https://github.com/rehypejs/rehype-format)
+    — format HTML
+*   [`rehype-minify`](https://github.com/rehypejs/rehype-minify)
+    — minify HTML
 
 ## Contribute
 
@@ -144,6 +510,8 @@ abide by its terms.
 
 [chat]: https://github.com/rehypejs/rehype/discussions
 
+[skypack]: https://www.skypack.dev
+
 [npm]: https://docs.npmjs.com/cli/install
 
 [health]: https://github.com/rehypejs/.github
@@ -158,8 +526,22 @@ abide by its terms.
 
 [author]: https://wooorm.com
 
+[unified]: https://github.com/unifiedjs/unified
+
 [rehype]: https://github.com/rehypejs/rehype
 
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
+[typescript]: https://www.typescriptlang.org
+
+[hast]: https://github.com/syntax-tree/hast
+
+[hast-util-sanitize]: https://github.com/syntax-tree/hast-util-sanitize
+
 [schema]: https://github.com/syntax-tree/hast-util-sanitize#schema
+
+[rehype-katex]: https://github.com/remarkjs/remark-math/tree/main/packages/rehype-katex
+
+[rehype-mathjax]: https://github.com/remarkjs/remark-math/tree/main/packages/rehype-mathjax
+
+[rehype-highlight]: https://github.com/rehypejs/rehype-highlight

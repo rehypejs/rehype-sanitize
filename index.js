@@ -1,6 +1,10 @@
 /**
  * @typedef {import('hast').Root} Root
+ *
  * @typedef {import('hast-util-sanitize').Schema} Options
+ *   The sanitation schema defines how and if nodes and properties should be cleaned.
+ *   See `hast-util-sanitize`.
+ *   The default schema is exported as `defaultSchema`.
  */
 
 import {sanitize as hastUtilSanitize, defaultSchema} from 'hast-util-sanitize'
