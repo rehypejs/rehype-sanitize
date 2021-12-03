@@ -372,7 +372,9 @@ and *then* using those plugins:
 ### Example: syntax highlighting
 
 Highlighting, for example with [`rehype-highlight`][rehype-highlight], can be
-solved similar to how math is solved (see previous example):
+solved similar to how math is solved (see previous example).
+That is, use `rehype-sanitize` and allow the classes needed for highlighting,
+and highlight afterwards:
 
 ```js
 import {unified} from 'unified'
