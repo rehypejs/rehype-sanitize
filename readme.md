@@ -60,17 +60,17 @@ In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
 npm install rehype-sanitize
 ```
 
-In Deno with [Skypack][]:
+In Deno with [`esm.sh`][esmsh]:
 
 ```js
-import rehypeSanitize from 'https://cdn.skypack.dev/rehype-sanitize@5?dts'
+import rehypeSanitize from 'https://esm.sh/rehype-sanitize@5'
 ```
 
-In browsers with [Skypack][]:
+In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import rehypeSanitize from 'https://cdn.skypack.dev/rehype-sanitize@5?min'
+  import rehypeSanitize from 'https://esm.sh/rehype-sanitize@5?bundle'
 </script>
 ```
 
@@ -512,7 +512,7 @@ abide by its terms.
 
 [chat]: https://github.com/rehypejs/rehype/discussions
 
-[skypack]: https://www.skypack.dev
+[esmsh]: https://esm.sh
 
 [npm]: https://docs.npmjs.com/cli/install
 
