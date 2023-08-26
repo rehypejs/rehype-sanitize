@@ -17,7 +17,9 @@
 *   [Install](#install)
 *   [Use](#use)
 *   [API](#api)
+    *   [`defaultSchema`](#defaultschema)
     *   [`unified().use(rehypeSanitize[, schema])`](#unifieduserehypesanitize-schema)
+    *   [`Options`](#options)
 *   [Example](#example)
     *   [Example: headings (DOM clobbering)](#example-headings-dom-clobbering)
     *   [Example: math](#example-math)
@@ -53,8 +55,8 @@ internals away.
 
 ## Install
 
-This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
-In Node.js (version 12.20+, 14.14+, or 16.0+), install with [npm][]:
+This package is [ESM only][esm].
+In Node.js (version 16+), install with [npm][]:
 
 ```sh
 npm install rehype-sanitize
@@ -92,26 +94,22 @@ require('child_process').spawn('echo', ['hack!']);
 </script>
 ```
 
-And our module `example.js` looks as follows:
+…and our module `example.js` looks as follows:
 
 ```js
-import {read} from 'to-vfile'
-import {unified} from 'unified'
 import rehypeParse from 'rehype-parse'
 import rehypeSanitize from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
+import {read} from 'to-vfile'
+import {unified} from 'unified'
 
-main()
+const file = await unified()
+  .use(rehypeParse, {fragment: true})
+  .use(rehypeSanitize)
+  .use(rehypeStringify)
+  .process(await read('index.html'))
 
-async function main() {
-  const file = await unified()
-    .use(rehypeParse, {fragment: true})
-    .use(rehypeSanitize)
-    .use(rehypeStringify)
-    .process(await read('index.html'))
-
-  console.log(String(file))
-}
+console.log(String(file))
 ```
 
 Now running `node example.js` yields:
@@ -129,21 +127,34 @@ Now running `node example.js` yields:
 
 ## API
 
-This package exports the following identifiers: `defaultSchema`.
-The default export is `rehypeSanitize`.
+This package exports the identifier [`defaultSchema`][api-default-schema].
+The default export is [`rehypeSanitize`][api-rehype-sanitize].
+
+### `defaultSchema`
+
+Default schema ([`Options`][api-options]).
+
+Follows GitHub style sanitation.
 
 ### `unified().use(rehypeSanitize[, schema])`
 
 Sanitize HTML.
 
-###### `schema`
+###### Parameters
 
-Sanitation schema that defines if and how nodes and properties should be
-cleaned.
-The default schema is exported as `defaultSchema`.
+*   `options` ([`Options`][api-options], optional)
+    — configuration
 
-This option is a bit advanced as it requires knowledge of ASTs, so we defer
-to the documentation available for [`Schema` in `hast-util-sanitize`][schema].
+###### Returns
+
+Transform ([`Transformer`][unified-transformer]).
+
+### `Options`
+
+Schema that defines what nodes and properties are allowed (TypeScript type).
+
+This option is a bit advanced as it requires knowledge of syntax trees, so see
+the docs for [`Schema` in `hast-util-sanitize`][hast-util-sanitize-schema].
 
 ## Example
 
@@ -162,37 +173,40 @@ console.log(current)
 And our module `example.js` contains:
 
 ```js
-import {promises as fs} from 'node:fs'
-import {unified} from 'unified'
+/**
+ * @typedef {import('hast').Root} Root
+ */
+
+import fs from 'node:fs/promises'
 import rehypeParse from 'rehype-parse'
 import rehypeStringify from 'rehype-stringify'
+import {unified} from 'unified'
 
-main()
-
-async function main() {
-  const browser = String(await fs.readFile('browser.js'))
-  const document = `<a name="old"></a>
+const browser = String(await fs.readFile('browser.js'))
+const document = `<a name="old"></a>
 <h1 id="current">Current</h1>
 ${`<p>${'Lorem ipsum dolor sit amet. '.repeat(20)}</p>\n`.repeat(20)}
 <p>Link to <a href="#current">current</a>, link to <a href="#old">old</a>.`
 
-  const file = await unified()
-    .use(rehypeParse, {fragment: true})
-    .use(function () {
-      return function (tree) {
-        tree.children.push({
-          type: 'element',
-          tagName: 'script',
-          properties: {type: 'module'},
-          children: [{type: 'text', value: browser}]
-        })
-      }
-    })
-    .use(rehypeStringify)
-    .process(document)
+const file = await unified()
+  .use(rehypeParse, {fragment: true})
+  .use(function () {
+    /**
+     * @param {Root} tree
+     */
+    return function (tree) {
+      tree.children.push({
+        type: 'element',
+        tagName: 'script',
+        properties: {type: 'module'},
+        children: [{type: 'text', value: browser}]
+      })
+    }
+  })
+  .use(rehypeStringify)
+  .process(document)
 
-  await fs.writeFile('output.html', file.value)
-}
+await fs.writeFile('output.html', String(file))
 ```
 
 This code processes HTML, inlines our browser script into it, and writes it out.
@@ -210,10 +224,11 @@ The generated HTML looks like:
 <script type="module">console.log(current)</script>
 ```
 
-When you run this code locally, open the generated `output.html`, you can
+When you run this code locally and open the generated `output.html`, you can
 observe that the links at the bottom work, but also that the `<h1>` element
 is printed to the console (the clobbering).
-`rehype-sanitize` solved the clobbering by prefixing every `id` and `name`
+
+`rehype-sanitize` solves the clobbering by prefixing every `id` and `name`
 attribute with `'user-content-'`.
 Changing `example.js`:
 
@@ -224,8 +239,8 @@ Changing `example.js`:
      .use(rehypeParse, {fragment: true})
 +    .use(rehypeSanitize)
      .use(function () {
-       return function (tree) {
-         tree.children.push({
+       /**
+        * @param {Root} tree
 ```
 
 Now yields:
@@ -237,7 +252,7 @@ Now yields:
 +<h1 id="user-content-current">Current</h1>
 ```
 
-But this introduces another problem as the links are now broken.
+This introduces another problem as the links are now broken.
 It could perhaps be solved by changing all links, but that would make the links
 rather ugly, and we’d need to track what IDs we have outside of the user content
 on our pages too.
@@ -247,6 +262,9 @@ This is what GitHub does.
 Replace `browser.js` with the following:
 
 ```js
+/// <reference lib="dom" />
+/* eslint-env browser */
+
 // Page load (you could wrap this in a DOM ready if the script is loaded early).
 hashchange()
 
@@ -305,24 +323,20 @@ and of inline styles, most of which this plugin will remove.
 Say our module `example.js` contains:
 
 ```js
-import {unified} from 'unified'
-import rehypeParse from 'rehype-parse'
 import rehypeKatex from 'rehype-katex'
+import rehypeParse from 'rehype-parse'
 import rehypeSanitize from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
+import {unified} from 'unified'
 
-main()
+const file = await unified()
+  .use(rehypeParse, {fragment: true})
+  .use(rehypeKatex)
+  .use(rehypeSanitize)
+  .use(rehypeStringify)
+  .process('<span class="math math-inline">L</span>')
 
-async function main() {
-  const file = await unified()
-    .use(rehypeParse, {fragment: true})
-    .use(rehypeKatex)
-    .use(rehypeSanitize)
-    .use(rehypeStringify)
-    .process('<span class="math math-inline">L</span>')
-
-  console.log(String(file))
-}
+console.log(String(file))
 ```
 
 Running that yields:
@@ -339,36 +353,35 @@ and *then* using those plugins:
 
 ```diff
 @@ -1,7 +1,7 @@
- import {unified} from 'unified'
- import rehypeParse from 'rehype-parse'
  import rehypeKatex from 'rehype-katex'
+ import rehypeParse from 'rehype-parse'
 -import rehypeSanitize from 'rehype-sanitize'
 +import rehypeSanitize, {defaultSchema} from 'rehype-sanitize'
  import rehypeStringify from 'rehype-stringify'
+ import {unified} from 'unified'
 
  main()
 @@ -9,8 +9,21 @@ main()
- async function main() {
-   const file = await unified()
-     .use(rehypeParse, {fragment: true})
-+    .use(rehypeSanitize, {
-+      ...defaultSchema,
-+      attributes: {
-+        ...defaultSchema.attributes,
-+        div: [
-+          ...(defaultSchema.attributes.div || []),
-+          ['className', 'math', 'math-display']
-+        ],
-+        span: [
-+          ...(defaultSchema.attributes.span || []),
-+          ['className', 'math', 'math-inline']
-+        ]
-+      }
-+    })
-     .use(rehypeKatex)
--    .use(rehypeSanitize)
-     .use(rehypeStringify)
-     .process('<span class="math math-inline">L</span>')
+ const file = await unified()
+   .use(rehypeParse, {fragment: true})
++  .use(rehypeSanitize, {
++    ...defaultSchema,
++    attributes: {
++      ...defaultSchema.attributes,
++      div: [
++        ...(defaultSchema.attributes.div || []),
++        ['className', 'math', 'math-display']
++      ],
++      span: [
++        ...(defaultSchema.attributes.span || []),
++        ['className', 'math', 'math-inline']
++      ]
++    }
++  })
+   .use(rehypeKatex)
+-  .use(rehypeSanitize)
+   .use(rehypeStringify)
+   .process('<span class="math math-inline">L</span>')
 ```
 
 ### Example: syntax highlighting
@@ -379,34 +392,30 @@ That is, use `rehype-sanitize` and allow the classes needed for highlighting,
 and highlight afterwards:
 
 ```js
-import {unified} from 'unified'
-import rehypeParse from 'rehype-parse'
 import rehypeHighlight from 'rehype-highlight'
+import rehypeParse from 'rehype-parse'
 import rehypeSanitize, {defaultSchema} from 'rehype-sanitize'
 import rehypeStringify from 'rehype-stringify'
+import {unified} from 'unified'
 
-main()
+const file = await unified()
+  .use(rehypeParse, {fragment: true})
+  .use(rehypeSanitize, {
+    ...defaultSchema,
+    attributes: {
+      ...defaultSchema.attributes,
+      code: [
+        ...(defaultSchema.attributes.code || []),
+        // List of all allowed languages:
+        ['className', 'language-js', 'language-css', 'language-md']
+      ]
+    }
+  })
+  .use(rehypeHighlight, {subset: false})
+  .use(rehypeStringify)
+  .process('<pre><code className="language-js">console.log(1)</code></pre>')
 
-async function main() {
-  const file = await unified()
-    .use(rehypeParse, {fragment: true})
-    .use(rehypeSanitize, {
-      ...defaultSchema,
-      attributes: {
-        ...defaultSchema.attributes,
-        code: [
-          ...(defaultSchema.attributes.code || []),
-          // List of all allowed languages:
-          ['className', 'language-js', 'language-css', 'language-md']
-        ]
-      }
-    })
-    .use(rehypeHighlight, {subset: false})
-    .use(rehypeStringify)
-    .process('<pre><code className="language-js">console.log(1)</code></pre>')
-
-  console.log(String(file))
-}
+console.log(String(file))
 ```
 
 Alternatively, it’s possible to make highlighting safe by allowing all the
@@ -414,43 +423,44 @@ classes used on tokens.
 Modifying the above code like so:
 
 ```diff
- async function main() {
-   const file = await unified()
-     .use(rehypeParse, {fragment: true})
-+    .use(rehypeHighlight, {subset: false})
-     .use(rehypeSanitize, {
-       ...defaultSchema,
-       attributes: {
-         ...defaultSchema.attributes,
--        code: [
--          ...(defaultSchema.attributes.code || []),
--          // List of all allowed languages:
--          ['className', 'hljs', 'language-js', 'language-css', 'language-md']
-+        span: [
-+          ...(defaultSchema.attributes.span || []),
-+          // List of all allowed tokens:
-+          ['className', 'hljs-addition', 'hljs-attr', 'hljs-attribute', 'hljs-built_in', 'hljs-bullet', 'hljs-char', 'hljs-code', 'hljs-comment', 'hljs-deletion', 'hljs-doctag', 'hljs-emphasis', 'hljs-formula', 'hljs-keyword', 'hljs-link', 'hljs-literal', 'hljs-meta', 'hljs-name', 'hljs-number', 'hljs-operator', 'hljs-params', 'hljs-property', 'hljs-punctuation', 'hljs-quote', 'hljs-regexp', 'hljs-section', 'hljs-selector-attr', 'hljs-selector-class', 'hljs-selector-id', 'hljs-selector-pseudo', 'hljs-selector-tag', 'hljs-string', 'hljs-strong', 'hljs-subst', 'hljs-symbol', 'hljs-tag', 'hljs-template-tag', 'hljs-template-variable', 'hljs-title', 'hljs-type', 'hljs-variable'
+ const file = await unified()
+   .use(rehypeParse, {fragment: true})
++  .use(rehypeHighlight, {subset: false})
+   .use(rehypeSanitize, {
+     ...defaultSchema,
+     attributes: {
+       ...defaultSchema.attributes,
+-      code: [
+-        ...(defaultSchema.attributes.code || []),
+-        // List of all allowed languages:
+-        ['className', 'hljs', 'language-js', 'language-css', 'language-md']
++      span: [
++        ...(defaultSchema.attributes.span || []),
++        // List of all allowed tokens:
++        ['className', 'hljs-addition', 'hljs-attr', 'hljs-attribute', 'hljs-built_in', 'hljs-bullet', 'hljs-char', 'hljs-code', 'hljs-comment', 'hljs-deletion', 'hljs-doctag', 'hljs-emphasis', 'hljs-formula', 'hljs-keyword', 'hljs-link', 'hljs-literal', 'hljs-meta', 'hljs-name', 'hljs-number', 'hljs-operator', 'hljs-params', 'hljs-property', 'hljs-punctuation', 'hljs-quote', 'hljs-regexp', 'hljs-section', 'hljs-selector-attr', 'hljs-selector-class', 'hljs-selector-id', 'hljs-selector-pseudo', 'hljs-selector-tag', 'hljs-string', 'hljs-strong', 'hljs-subst', 'hljs-symbol', 'hljs-tag', 'hljs-template-tag', 'hljs-template-variable', 'hljs-title', 'hljs-type', 'hljs-variable'
 +          ]
-         ]
-       }
-     })
--    .use(rehypeHighlight, {subset: false})
-     .use(rehypeStringify)
-     .process('<pre><code className="language-js">console.log(1)</code></pre>')
+       ]
+     }
+   })
+-  .use(rehypeHighlight, {subset: false})
+   .use(rehypeStringify)
+   .process('<pre><code className="language-js">console.log(1)</code></pre>')
 ```
 
 ## Types
 
 This package is fully typed with [TypeScript][].
-It exports an `Options` type, which specifies the interface of the accepted
-options.
+It exports the additional type [`Options`][api-options].
 
 ## Compatibility
 
-Projects maintained by the unified collective are compatible with all maintained
+Projects maintained by the unified collective are compatible with maintained
 versions of Node.js.
-As of now, that is Node.js 12.20+, 14.14+, and 16.0+.
-Our projects sometimes work with older versions, but this is not guaranteed.
+
+When we cut a new major release, we drop support for unmaintained versions of
+Node.
+This means we try to keep the current release line, `rehype-sanitize@^5`,
+compatible with Node.js 12.
 
 This plugin works with `rehype-parse` version 3+, `rehype-stringify` version 3+,
 `rehype` version 5+, and `unified` version 6+.
@@ -500,9 +510,9 @@ abide by its terms.
 
 [downloads]: https://www.npmjs.com/package/rehype-sanitize
 
-[size-badge]: https://img.shields.io/bundlephobia/minzip/rehype-sanitize.svg
+[size-badge]: https://img.shields.io/bundlejs/size/rehype-sanitize
 
-[size]: https://bundlephobia.com/result?p=rehype-sanitize
+[size]: https://bundlejs.com/?q=rehype-sanitize
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
@@ -513,6 +523,8 @@ abide by its terms.
 [chat-badge]: https://img.shields.io/badge/chat-discussions-success.svg
 
 [chat]: https://github.com/rehypejs/rehype/discussions
+
+[esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
 [esmsh]: https://esm.sh
 
@@ -530,10 +542,6 @@ abide by its terms.
 
 [author]: https://wooorm.com
 
-[unified]: https://github.com/unifiedjs/unified
-
-[rehype]: https://github.com/rehypejs/rehype
-
 [xss]: https://en.wikipedia.org/wiki/Cross-site_scripting
 
 [typescript]: https://www.typescriptlang.org
@@ -542,10 +550,22 @@ abide by its terms.
 
 [hast-util-sanitize]: https://github.com/syntax-tree/hast-util-sanitize
 
-[schema]: https://github.com/syntax-tree/hast-util-sanitize#schema
+[hast-util-sanitize-schema]: https://github.com/syntax-tree/hast-util-sanitize#schema
+
+[rehype]: https://github.com/rehypejs/rehype
 
 [rehype-katex]: https://github.com/remarkjs/remark-math/tree/main/packages/rehype-katex
 
 [rehype-mathjax]: https://github.com/remarkjs/remark-math/tree/main/packages/rehype-mathjax
 
 [rehype-highlight]: https://github.com/rehypejs/rehype-highlight
+
+[unified]: https://github.com/unifiedjs/unified
+
+[unified-transformer]: https://github.com/unifiedjs/unified?tab=readme-ov-file#transformer
+
+[api-default-schema]: #defaultschema
+
+[api-options]: #options
+
+[api-rehype-sanitize]: #unifieduserehypesanitize-schema
