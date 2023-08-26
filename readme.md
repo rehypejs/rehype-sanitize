@@ -178,13 +178,15 @@ ${`<p>${'Lorem ipsum dolor sit amet. '.repeat(20)}</p>\n`.repeat(20)}
 
   const file = await unified()
     .use(rehypeParse, {fragment: true})
-    .use(() => (tree) => {
-      tree.children.push({
-        type: 'element',
-        tagName: 'script',
-        properties: {type: 'module'},
-        children: [{type: 'text', value: browser}]
-      })
+    .use(function () {
+      return function (tree) {
+        tree.children.push({
+          type: 'element',
+          tagName: 'script',
+          properties: {type: 'module'},
+          children: [{type: 'text', value: browser}]
+        })
+      }
     })
     .use(rehypeStringify)
     .process(document)
@@ -221,9 +223,9 @@ Changing `example.js`:
    const file = await unified()
      .use(rehypeParse, {fragment: true})
 +    .use(rehypeSanitize)
-     .use(() => (tree) => {
-       tree.children.push({
-         type: 'element',
+     .use(function () {
+       return function (tree) {
+         tree.children.push({
 ```
 
 Now yields:
@@ -255,14 +257,14 @@ window.addEventListener('hashchange', hashchange)
 // doesn’t emit `hashchange`.
 document.addEventListener(
   'click',
-  (event) => {
+  function (event) {
     if (
       event.target &&
       event.target instanceof HTMLAnchorElement &&
       event.target.href === location.href &&
       location.hash.length > 1
     ) {
-      setTimeout(() => {
+      setImmediate(function () {
         if (!event.defaultPrevented) {
           hashchange()
         }
@@ -273,7 +275,7 @@ document.addEventListener(
 )
 
 function hashchange() {
-  /** @type {string|undefined} */
+  /** @type {string | undefined} */
   let hash
 
   try {
@@ -287,9 +289,9 @@ function hashchange() {
     document.getElementById(name) || document.getElementsByName(name)[0]
 
   if (target) {
-    setTimeout(() => {
+    setImmediate(function () {
       target.scrollIntoView()
-    }, 0)
+    })
   }
 }
 ```

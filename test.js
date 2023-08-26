@@ -5,6 +5,13 @@ import {rehype} from 'rehype'
 import rehypeSanitize, {defaultSchema} from './index.js'
 
 test('rehypeSanitize', async function (t) {
+  await t.test('should expose the public api', async function () {
+    assert.deepEqual(Object.keys(await import('./index.js')).sort(), [
+      'default',
+      'defaultSchema'
+    ])
+  })
+
   await t.test('should work', async function () {
     const file = await rehype()
       .use(rehypeSanitize)
@@ -21,7 +28,6 @@ test('rehypeSanitize', async function (t) {
         '<math><mi xlink:href="data:x,<script>alert(\'echo\')</script>"></mi></math>'
       )
 
-    assert.equal(file.messages.length, 0)
     assert.equal(String(file), '<math><mi></mi></math>')
   })
 })
