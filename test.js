@@ -1,39 +1,27 @@
-import test from 'tape'
-import {rehype} from 'rehype'
+import assert from 'node:assert/strict'
+import test from 'node:test'
 import merge from 'deepmerge'
+import {rehype} from 'rehype'
 import rehypeSanitize, {defaultSchema} from './index.js'
 
-test('rehypeSanitize', (t) => {
-  t.plan(2)
-
-  t.test('should work', (st) => {
-    const input = '<img onmouseover="alert(\'alpha\')">'
-    const output = '<img>'
-
-    st.plan(3)
-
-    rehype()
+test('rehypeSanitize', async function (t) {
+  await t.test('should work', async function () {
+    const file = await rehype()
       .use(rehypeSanitize)
-      .process(input, (error, file) => {
-        st.ifErr(error, 'shouldn’t fail')
-        st.equal((file || {messages: []}).messages.length, 0, 'shouldn’t warn')
-        st.equal(String(file), String(output), 'should match')
-      })
+      .process('<img onmouseover="alert(\'alpha\')">')
+
+    assert.equal(file.messages.length, 0)
+    assert.equal(String(file), '<img>')
   })
 
-  t.test('options', (st) => {
-    const input =
-      '<math><mi xlink:href="data:x,<script>alert(\'echo\')</script>"></mi></math>'
-    const output = '<math><mi></mi></math>'
-
-    st.plan(3)
-
-    rehype()
+  await t.test('should support options', async function () {
+    const file = await rehype()
       .use(rehypeSanitize, merge(defaultSchema, {tagNames: ['math', 'mi']}))
-      .process(input, (error, file) => {
-        st.ifErr(error, 'shouldn’t fail')
-        st.equal((file || {messages: []}).messages.length, 0, 'shouldn’t warn')
-        st.equal(String(file), String(output), 'should match')
-      })
+      .process(
+        '<math><mi xlink:href="data:x,<script>alert(\'echo\')</script>"></mi></math>'
+      )
+
+    assert.equal(file.messages.length, 0)
+    assert.equal(String(file), '<math><mi></mi></math>')
   })
 })
