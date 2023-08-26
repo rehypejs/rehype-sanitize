@@ -65,14 +65,14 @@ npm install rehype-sanitize
 In Deno with [`esm.sh`][esmsh]:
 
 ```js
-import rehypeSanitize from 'https://esm.sh/rehype-sanitize@5'
+import rehypeSanitize from 'https://esm.sh/rehype-sanitize@6'
 ```
 
 In browsers with [`esm.sh`][esmsh]:
 
 ```html
 <script type="module">
-  import rehypeSanitize from 'https://esm.sh/rehype-sanitize@5?bundle'
+  import rehypeSanitize from 'https://esm.sh/rehype-sanitize@6?bundle'
 </script>
 ```
 
