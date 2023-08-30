@@ -562,7 +562,7 @@ abide by its terms.
 
 [unified]: https://github.com/unifiedjs/unified
 
-[unified-transformer]: https://github.com/unifiedjs/unified?tab=readme-ov-file#transformer
+[unified-transformer]: https://github.com/unifiedjs/unified#transformer
 
 [api-default-schema]: #defaultschema
 
