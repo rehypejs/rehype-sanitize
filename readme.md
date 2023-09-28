@@ -318,8 +318,8 @@ function hashchange() {
 
 Math can be enabled in rehype by using the plugins
 [`rehype-katex`][rehype-katex] or [`rehype-mathjax`][rehype-mathjax].
-The operate on `span`s and `div`s with certain classes and inject complex markup
-and of inline styles, most of which this plugin will remove.
+The operate on elements with certain classes and inject complex markup and of
+inline styles, most of which this plugin will remove.
 Say our module `example.js` contains:
 
 ```js
@@ -334,7 +334,7 @@ const file = await unified()
   .use(rehypeKatex)
   .use(rehypeSanitize)
   .use(rehypeStringify)
-  .process('<span class="math math-inline">L</span>')
+  .process('<code class="math-inline">L</code>')
 
 console.log(String(file))
 ```
@@ -342,17 +342,17 @@ console.log(String(file))
 Running that yields:
 
 ```html
-<span><span><span>LL</span><span aria-hidden="true"><span><span></span><span>L</span></span></span></span></span>
+<span><span>LL</span><span><span><span></span><span>L</span></span></span></span>
 ```
 
 It is possible to pass a schema which allows MathML and inline styles, but it
-would be complex, and allows *all* inline styles, which is unsafe.
+would be complex and allows *all* inline styles, which is unsafe.
 Alternatively, and arguably better, would be to *first* sanitize the HTML,
 allowing only the specific classes that `rehype-katex` and `rehype-mathjax` use,
 and *then* using those plugins:
 
 ```diff
-@@ -1,7 +1,7 @@
+@@ -1,13 +1,20 @@
  import rehypeKatex from 'rehype-katex'
  import rehypeParse from 'rehype-parse'
 -import rehypeSanitize from 'rehype-sanitize'
@@ -360,28 +360,26 @@ and *then* using those plugins:
  import rehypeStringify from 'rehype-stringify'
  import {unified} from 'unified'
 
- main()
-@@ -9,8 +9,21 @@ main()
  const file = await unified()
    .use(rehypeParse, {fragment: true})
 +  .use(rehypeSanitize, {
 +    ...defaultSchema,
 +    attributes: {
 +      ...defaultSchema.attributes,
-+      div: [
-+        ...(defaultSchema.attributes.div || []),
-+        ['className', 'math', 'math-display']
-+      ],
-+      span: [
-+        ...(defaultSchema.attributes.span || []),
-+        ['className', 'math', 'math-inline']
-+      ]
++      // The `language-*` regex is allowed by default.
++      code: [['className', /^language-./, 'math-inline', 'math-display']]
 +    }
 +  })
    .use(rehypeKatex)
 -  .use(rehypeSanitize)
    .use(rehypeStringify)
-   .process('<span class="math math-inline">L</span>')
+   .process('<code class="math-inline">L</code>')
+```
+
+Running that yields:
+
+```html
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML">…</math></span><span class="katex-html" aria-hidden="true">…</span></span>
 ```
 
 ### Example: syntax highlighting
